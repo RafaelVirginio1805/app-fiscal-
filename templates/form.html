@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Censo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f7f8;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        form {
+            background: #fff;
+            max-width: 700px;
+            margin: auto;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 18px;
+            border: 1.8px solid #ccc;
+            border-radius: 5px;
+            transition: border-color 0.3s ease;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus,
+        select:focus {
+            border-color: #2980b9;
+            outline: none;
+            box-shadow: 0 0 6px #2980b9a0;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin-right: 10px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            user-select: none;
+        }
+
+        button:hover {
+            background-color: #1f6391;
+        }
+
+        button[type="button"] {
+            background-color: #27ae60;
+        }
+
+        button[type="button"]:hover {
+            background-color: #1e874b;
+        }
+
+        .ocupante {
+            border: 1.5px solid #d1d8e0;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 7px;
+            background-color: #f9fbfc;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .botoes-container {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+
+    <script>
+        let count = 0;
+        function adicionarOcupante() {
+            const container = document.getElementById("ocupantes");
+            const div = document.createElement("div");
+            div.className = "ocupante";
+            div.innerHTML = `
+                <label>Ocupante:</label>
+                <input type="text" name="ocupante_nome_${count}" required>
+                
+                <label>Nível Fixação:</label>
+                <input type="text" name="nivel_fixacao_${count}" required>
+
+                <label>Tipo Cabo:</label>
+                <input type="text" name="tipo_cabo_${count}" required>
+
+                <label>Equipamento:</label>
+                <input type="text" name="equipamento_${count}" required>
+
+                <label>Placa Identificação:</label>
+                <input type="text" name="placa_identificacao_${count}" required>
+
+                <label>Irregularidades:</label>
+                <input type="text" name="irregularidades_${count}" required>
+
+                <label>Fotos do Ocupante:</label>
+                <input type="file" name="foto_ocupante_${count}[]" accept="image/*" multiple required>
+            `;
+            container.appendChild(div);
+            count++;
+            document.getElementById("total_ocupantes").value = count;
+        }
+
+        window.onload = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                    },
+                    (error) => {
+                        console.warn('Erro ao obter localização:', error.message);
+                    }
+                );
+            } else {
+                alert("Seu navegador não suporta geolocalização.");
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Cadastro de Censo</h1>
+    <form action="/enviar" method="POST" enctype="multipart/form-data">
+        <label for="cidade">Cidade:</label>
+        <input type="text" name="cidade" id="cidade" required>
+
+        <label for="logradouro">Logradouro:</label>
+        <input type="text" name="logradouro" id="logradouro" required>
+
+        <label for="numero">Número:</label>
+        <input type="text" name="numero" id="numero" required>
+
+        <label for="bairro">Bairro:</label>
+        <input type="text" name="bairro" id="bairro" required>
+
+        <label for="barramento">Barramento:</label>
+        <input type="text" name="barramento" id="barramento">
+
+        <label for="foto_poste">Fotos do Poste:</label>
+        <input type="file" name="foto_poste[]" id="foto_poste" accept="image/*" multiple required>
+
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+
+        <input type="hidden" id="total_ocupantes" name="total_ocupantes" value="0">
+
+        <div id="ocupantes"></div>
+
+        <div class="botoes-container">
+            <button type="button" onclick="adicionarOcupante()">Adicionar Ocupante</button>
+            <button type="submit">Enviar</button>
+        </div>
+    </form>
+</body>
+</html>
