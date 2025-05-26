@@ -11,31 +11,37 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f7f8;
+            background-color: #009640;
             padding: 20px;
-            color: #333;
+            color: #fff;
+            min-height: 100vh;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 30px;
             color: #2c3e50;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            letter-spacing: 1.5px;
         }
 
         form {
-            background: #fff;
+            background: #ffffffdd;
             max-width: 700px;
             margin: auto;
             padding: 25px 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            color: #222;
         }
 
         label {
             display: block;
             margin-bottom: 6px;
             font-weight: 600;
-            color: #34495e;
+            color: #006622;
         }
 
         input[type="text"],
@@ -44,53 +50,80 @@
             width: 100%;
             padding: 10px 12px;
             margin-bottom: 18px;
-            border: 1.8px solid #ccc;
-            border-radius: 5px;
-            transition: border-color 0.3s ease;
+            border: 1.8px solid #009640;
+            border-radius: 6px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
             font-size: 1rem;
             font-family: inherit;
+            background-color: #fefefe;
+            color: #222;
         }
 
         input[type="text"]:focus,
         input[type="file"]:focus,
         select:focus {
-            border-color: #2980b9;
+            border-color: #006622;
             outline: none;
-            box-shadow: 0 0 6px #2980b9a0;
+            box-shadow: 0 0 8px #007f32aa;
+            background-color: #fff;
         }
 
         button {
             cursor: pointer;
-            background-color: #2980b9;
+            background-color: #009640;
             color: white;
             border: none;
             padding: 12px 20px;
             margin-right: 10px;
             font-size: 1.1rem;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
             user-select: none;
+            box-shadow: 0 3px 8px #00762aaa;
         }
 
         button:hover {
-            background-color: #1f6391;
+            background-color: #00762a;
+            box-shadow: 0 5px 12px #005a1fdd;
         }
 
         button[type="button"] {
             background-color: #27ae60;
+            box-shadow: 0 3px 8px #1f7f4baa;
         }
 
         button[type="button"]:hover {
             background-color: #1e874b;
+            box-shadow: 0 5px 12px #166837dd;
         }
 
         .ocupante {
-            border: 1.5px solid #d1d8e0;
+            border: 1.5px solid #009640;
             padding: 20px;
             margin-bottom: 25px;
-            border-radius: 7px;
-            background-color: #f9fbfc;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border-radius: 8px;
+            background-color: #e9f5ea;
+            box-shadow: 0 1px 6px rgba(0, 102, 0, 0.15);
+            position: relative;
+            color: #134d13;
+        }
+
+        .ocupante .remover-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #c0392b;
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .ocupante .remover-btn:hover {
+            background-color: #962d22;
         }
 
         .botoes-container {
@@ -99,21 +132,33 @@
         }
     </style>
 
-    <script>
+   <script>
         let count = 0;
+        let tipos = [];
+
         function adicionarOcupante() {
             const container = document.getElementById("ocupantes");
             const div = document.createElement("div");
             div.className = "ocupante";
+            div.setAttribute("data-index", count);
+            div.id = `ocupante_${count}`;
+
+            const tipoOptions = tipos.map(t => `<option value="${t}">${t}</option>`).join("");
+
             div.innerHTML = `
+                <button type="button" class="remover-btn" onclick="removerOcupante(${count})">Remover Ocupante</button>
+
                 <label>Ocupante:</label>
                 <input type="text" name="ocupante_nome_${count}" required>
-                
+
                 <label>Nível Fixação:</label>
                 <input type="text" name="nivel_fixacao_${count}" required>
 
                 <label>Tipo Cabo:</label>
-                <input type="text" name="tipo_cabo_${count}" required>
+                <select name="tipo_cabo_${count}" required>
+                    <option value="" disabled selected>Selecione o tipo</option>
+                    ${tipoOptions}
+                </select>
 
                 <label>Equipamento:</label>
                 <input type="text" name="equipamento_${count}" required>
@@ -127,9 +172,17 @@
                 <label>Fotos do Ocupante:</label>
                 <input type="file" name="foto_ocupante_${count}[]" accept="image/*" multiple required>
             `;
+
             container.appendChild(div);
             count++;
             document.getElementById("total_ocupantes").value = count;
+        }
+
+        function removerOcupante(index) {
+            const div = document.getElementById(`ocupante_${index}`);
+            if (div) {
+                div.remove();
+            }
         }
 
         window.onload = () => {
@@ -146,6 +199,31 @@
             } else {
                 alert("Seu navegador não suporta geolocalização.");
             }
+
+            const cidades = {{ cidades|tojson }};
+            tipos = {{ tipos|tojson }};
+
+            const cidadeSelect = document.getElementById("cidade");
+            const bairroSelect = document.getElementById("bairro");
+
+            Object.keys(cidades).forEach(cidade => {
+                const option = document.createElement("option");
+                option.value = cidade;
+                option.text = cidade;
+                cidadeSelect.add(option);
+            });
+
+            cidadeSelect.addEventListener("change", function () {
+                const bairros = cidades[this.value] || [];
+                bairroSelect.innerHTML = "";
+
+                bairros.forEach(bairro => {
+                    const option = document.createElement("option");
+                    option.value = bairro;
+                    option.text = bairro;
+                    bairroSelect.add(option);
+                });
+            });
         };
     </script>
 </head>
@@ -153,16 +231,16 @@
     <h1>Cadastro de Censo</h1>
     <form action="/enviar" method="POST" enctype="multipart/form-data">
         <label for="cidade">Cidade:</label>
-        <input type="text" name="cidade" id="cidade" required>
+        <select name="cidade" id="cidade" required></select>
+
+        <label for="bairro">Bairro:</label>
+        <select name="bairro" id="bairro" required></select>
 
         <label for="logradouro">Logradouro:</label>
         <input type="text" name="logradouro" id="logradouro" required>
 
         <label for="numero">Número:</label>
         <input type="text" name="numero" id="numero" required>
-
-        <label for="bairro">Bairro:</label>
-        <input type="text" name="bairro" id="bairro" required>
 
         <label for="barramento">Barramento:</label>
         <input type="text" name="barramento" id="barramento">
@@ -172,7 +250,6 @@
 
         <input type="hidden" name="latitude" id="latitude">
         <input type="hidden" name="longitude" id="longitude">
-
         <input type="hidden" id="total_ocupantes" name="total_ocupantes" value="0">
 
         <div id="ocupantes"></div>
