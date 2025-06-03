@@ -4,44 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Censo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #009640;
+            font-family: 'Roboto', sans-serif;
+            background-color: #009640; /* Verde da Neoenergia */
             padding: 20px;
-            color: #fff;
+            color: #333;
             min-height: 100vh;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 30px;
-            color: #2c3e50;
-            font-size: clamp(2.5rem, 5vw, 4rem);
+            color: #ffffff;
+            font-size: 2.5rem;
             font-weight: 700;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-            letter-spacing: 1.5px;
         }
 
         form {
-            background: #ffffffdd;
-            max-width: 700px;
+            background: #ffffff;
+            max-width: 800px;
             margin: auto;
             padding: 25px 30px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            color: #222;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         label {
             display: block;
             margin-bottom: 6px;
             font-weight: 600;
-            color: #006622;
+            color: #0072BC;
+            text-transform: uppercase;
         }
 
         input[type="text"],
@@ -50,22 +51,23 @@
             width: 100%;
             padding: 10px 12px;
             margin-bottom: 18px;
-            border: 1.8px solid #009640;
+            border: 1.5px solid #009640;
             border-radius: 6px;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
             font-size: 1rem;
-            font-family: inherit;
             background-color: #fefefe;
-            color: #222;
+            color: #333;
         }
 
         input[type="text"]:focus,
         input[type="file"]:focus,
         select:focus {
-            border-color: #006622;
+            border-color: #F58220;
             outline: none;
-            box-shadow: 0 0 8px #007f32aa;
-            background-color: #fff;
+            box-shadow: 0 0 8px rgba(245, 130, 32, 0.3);
+        }
+
+        select option {
+            text-transform: uppercase;
         }
 
         button {
@@ -75,55 +77,40 @@
             border: none;
             padding: 12px 20px;
             margin-right: 10px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             border-radius: 6px;
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
-            user-select: none;
-            box-shadow: 0 3px 8px #00762aaa;
         }
 
         button:hover {
-            background-color: #00762a;
-            box-shadow: 0 5px 12px #005a1fdd;
-        }
-
-        button[type="button"] {
-            background-color: #27ae60;
-            box-shadow: 0 3px 8px #1f7f4baa;
-        }
-
-        button[type="button"]:hover {
-            background-color: #1e874b;
-            box-shadow: 0 5px 12px #166837dd;
+            background-color: #0072BC;
+            box-shadow: 0 4px 10px rgba(0, 114, 188, 0.3);
         }
 
         .ocupante {
-            border: 1.5px solid #009640;
+            border: 1.5px solid #0072BC;
             padding: 20px;
             margin-bottom: 25px;
             border-radius: 8px;
-            background-color: #e9f5ea;
-            box-shadow: 0 1px 6px rgba(0, 102, 0, 0.15);
+            background-color: #e6f2f7;
             position: relative;
-            color: #134d13;
         }
 
         .ocupante .remover-btn {
             position: absolute;
             top: 10px;
             right: 10px;
-            background-color: #c0392b;
+            background-color: #F58220;
             color: #fff;
             padding: 6px 10px;
             font-size: 0.9rem;
             border: none;
             border-radius: 4px;
-            transition: background-color 0.3s ease;
             cursor: pointer;
         }
 
         .ocupante .remover-btn:hover {
-            background-color: #962d22;
+            background-color: #d96b1f;
         }
 
         .botoes-container {
@@ -131,8 +118,7 @@
             margin-top: 15px;
         }
     </style>
-
-   <script>
+    <script>
         let count = 0;
         let tipos = [];
 
@@ -143,7 +129,7 @@
             div.setAttribute("data-index", count);
             div.id = `ocupante_${count}`;
 
-            const tipoOptions = tipos.map(t => `<option value="${t}">${t}</option>`).join("");
+            const tipoOptions = tipos.map(t => `<option value="${t}">${t.toUpperCase()}</option>`).join("");
 
             div.innerHTML = `
                 <button type="button" class="remover-btn" onclick="removerOcupante(${count})">Remover Ocupante</button>
@@ -209,7 +195,7 @@
             Object.keys(cidades).forEach(cidade => {
                 const option = document.createElement("option");
                 option.value = cidade;
-                option.text = cidade;
+                option.text = cidade.toUpperCase();
                 cidadeSelect.add(option);
             });
 
@@ -220,7 +206,7 @@
                 bairros.forEach(bairro => {
                     const option = document.createElement("option");
                     option.value = bairro;
-                    option.text = bairro;
+                    option.text = bairro.toUpperCase();
                     bairroSelect.add(option);
                 });
             });
