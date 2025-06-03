@@ -10,14 +10,12 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Caminho do CSV
+# Caminho dos CSVs
 CSV_PATH = 'data/cidades.csv'
-os.makedirs('data', exist_ok=True)
-
 CSV_PATH1 = 'data/tipo.csv'
 os.makedirs('data', exist_ok=True)
 
-# Criar CSV se não existir
+# Criar CSV de cidades se não existir
 if not os.path.exists(CSV_PATH):
     dados_iniciais = {
         'cidade': ['Salvador', 'Salvador', 'Feira de Santana'],
@@ -25,13 +23,13 @@ if not os.path.exists(CSV_PATH):
     }
     pd.DataFrame(dados_iniciais).to_csv(CSV_PATH, index=False)
 
-# Carregar CSV para dicionário
 def carregar_cidades():
     df = pd.read_csv(CSV_PATH)
+    df = df.dropna(subset=['CIDADE', 'BAIRRO'])  # ignora linhas incompletas
     cidades_dict = {}
     for _, row in df.iterrows():
-        cidade = row['CIDADE'].strip().title()
-        bairro = row['BAIRRO'].strip().title()
+        cidade = str(row['CIDADE']).strip().title()
+        bairro = str(row['BAIRRO']).strip().title()
         cidades_dict.setdefault(cidade, []).append(bairro)
     return cidades_dict
 
