@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 import os
 import pandas as pd
 import mysql.connector
 from datetime import datetime
 import utm
+import io
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -23,9 +24,10 @@ if not os.path.exists(CSV_PATH):
     }
     pd.DataFrame(dados_iniciais).to_csv(CSV_PATH, index=False)
 
+# Função corrigida para carregar cidades
 def carregar_cidades():
     df = pd.read_csv(CSV_PATH)
-    df = df.dropna(subset=['CIDADE', 'BAIRRO'])  # ignora linhas incompletas
+    df = df.dropna(subset=['CIDADE', 'BAIRRO'])  # ajustar nomes minúsculos do CSV gerado
     cidades_dict = {}
     for _, row in df.iterrows():
         cidade = str(row['CIDADE']).strip().title()
@@ -34,6 +36,8 @@ def carregar_cidades():
     return cidades_dict
 
 def carregar_tipo():
+    if not os.path.exists(CSV_PATH1):
+        return []
     df = pd.read_csv(CSV_PATH1)
     return df['TIPO'].dropna().str.strip().str.title().unique().tolist()
 
@@ -149,6 +153,55 @@ def salvar_no_banco(cidade, logradouro, numero, bairro, barramento, ocupante,
         conexao.close()
     except mysql.connector.Error as err:
         print(f"Erro ao inserir no banco: {err}")
+
+@app.route('/admin')
+def admin():
+    try:
+        conexao = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='1234',
+            database='app_fiscal'
+        )
+        cursor = conexao.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM registros ORDER BY data_hora DESC")
+        registros = cursor.fetchall()
+        cursor.close()
+        conexao.close()
+    except mysql.connector.Error as err:
+        registros = []
+        print(f"Erro ao buscar dados do banco: {err}")
+
+    return render_template('admin.html', registros=registros)
+
+@app.route('/exportar_excel')
+def exportar_excel():
+    try:
+        conexao = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='1234',
+            database='app_fiscal'
+        )
+        cursor = conexao.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM registros ORDER BY data_hora DESC")
+        registros = cursor.fetchall()
+        cursor.close()
+        conexao.close()
+
+        df = pd.DataFrame(registros)
+
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Registros')
+        output.seek(0)
+
+        return send_file(output,
+                         attachment_filename='registros.xlsx',
+                         as_attachment=True,
+                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    except Exception as e:
+        return f"Erro ao exportar Excel: {e}"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
