@@ -127,10 +127,10 @@ def salvar_no_banco(cidade, logradouro, numero, bairro, barramento, ocupante,
         utm_zone_letter = str(utm_zone_letter) if utm_zone_letter is not None else None
 
         conexao = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='1234',
-            database='app_fiscal'
+            host='10.211.4.147',
+            user='app_fiscal',
+            password='app_fiscal',
+            database='sch_app_fiscal'
         )
         cursor = conexao.cursor()
         query = """
@@ -158,10 +158,10 @@ def salvar_no_banco(cidade, logradouro, numero, bairro, barramento, ocupante,
 def admin():
     try:
         conexao = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='1234',
-            database='app_fiscal'
+            host='10.211.4.147',
+            user='app_fiscal',
+            password='app_fiscal',
+            database='sch_app_fiscal'
         )
         cursor = conexao.cursor(dictionary=True)
         cursor.execute("SELECT * FROM registros ORDER BY data_hora DESC")
@@ -178,10 +178,10 @@ def admin():
 def exportar_excel():
     try:
         conexao = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='1234',
-            database='app_fiscal'
+            host='10.211.4.147',
+            user='app_fiscal',
+            password='app_fiscal',
+            database='sch_app_fiscal'
         )
         cursor = conexao.cursor(dictionary=True)
         cursor.execute("SELECT * FROM registros ORDER BY data_hora DESC")
