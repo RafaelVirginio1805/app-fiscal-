@@ -134,7 +134,7 @@ def salvar_no_banco(cidade, logradouro, numero, bairro, barramento, ocupante,
         )
         cursor = conexao.cursor()
         query = """
-            INSERT INTO registros (
+            INSERT INTO tb_reg_app_fiscal (
                 cidade, logradouro, numero, bairro, barramento, ocupante,
                 nivel_fixacao, tipo_cabo, equipamento, placa_identificacao,
                 irregularidades, foto_ocupante_path, foto_poste_path,
@@ -164,15 +164,15 @@ def admin():
             database='sch_app_fiscal'
         )
         cursor = conexao.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM registros ORDER BY data_hora DESC")
-        registros = cursor.fetchall()
+        cursor.execute("SELECT * FROM tb_reg_app_fiscal ORDER BY data_hora DESC")
+        tb_reg_app_fiscal = cursor.fetchall()
         cursor.close()
         conexao.close()
     except mysql.connector.Error as err:
-        registros = []
+        tb_reg_app_fiscal = []
         print(f"Erro ao buscar dados do banco: {err}")
 
-    return render_template('admin.html', registros=registros)
+    return render_template('admin.html', tb_reg_app_fiscal=tb_reg_app_fiscal)
 
 @app.route('/exportar_excel')
 def exportar_excel():
@@ -184,16 +184,16 @@ def exportar_excel():
             database='sch_app_fiscal'
         )
         cursor = conexao.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM registros ORDER BY data_hora DESC")
-        registros = cursor.fetchall()
+        cursor.execute("SELECT * FROM tb_reg_app_fiscal ORDER BY data_hora DESC")
+        tb_reg_app_fiscal = cursor.fetchall()
         cursor.close()
         conexao.close()
 
-        df = pd.DataFrame(registros)
+        df = pd.DataFrame(tb_reg_app_fiscal)
 
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            df.to_excel(writer, index=False, sheet_name='Registros')
+            df.to_excel(writer, index=False, sheet_name='tb_reg_app_fiscal')
         output.seek(0)
 
         return send_file(output,
