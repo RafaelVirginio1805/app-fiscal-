@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify
 import os
 import pandas as pd
 import mysql.connector
@@ -151,8 +151,9 @@ def salvar_no_banco(cidade, logradouro, numero, bairro, barramento, ocupante,
         conexao.commit()
         cursor.close()
         conexao.close()
+        return jsonify({"status": "sucesso", "mensagem": "dados inseridos com sucesso!})
     except mysql.connector.Error as err:
-        print(f"Erro ao inserir no banco: {err}")
+        return jsonify({"status": "erro", "mensagem": f"erro ao inserir no banco:{err}"})
 
 @app.route('/admin')
 def admin():
