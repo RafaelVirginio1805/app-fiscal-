@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Censo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #009640; /* Verde da Neoenergia */
+            padding: 20px;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffffff;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        form {
+            background: #ffffff;
+            max-width: 800px;
+            margin: auto;
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #0072BC;
+            text-transform: uppercase;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 18px;
+            border: 1.5px solid #009640;
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: #fefefe;
+            color: #333;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus,
+        select:focus {
+            border-color: #F58220;
+            outline: none;
+            box-shadow: 0 0 8px rgba(245, 130, 32, 0.3);
+        }
+
+        select option {
+            text-transform: uppercase;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #009640;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin-right: 10px;
+            font-size: 1rem;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0072BC;
+            box-shadow: 0 4px 10px rgba(0, 114, 188, 0.3);
+        }
+
+        .ocupante {
+            border: 1.5px solid #0072BC;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            background-color: #e6f2f7;
+            position: relative;
+        }
+
+        .ocupante .remover-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #F58220;
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .ocupante .remover-btn:hover {
+            background-color: #d96b1f;
+        }
+
+        .botoes-container {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+    <script>
+        let count = 0;
+        let tipos = [];
+
+        function adicionarOcupante() {
+            const container = document.getElementById("ocupantes");
+            const div = document.createElement("div");
+            div.className = "ocupante";
+            div.setAttribute("data-index", count);
+            div.id = `ocupante_${count}`;
+
+            const tipoOptions = tipos.map(t => `<option value="${t}">${t.toUpperCase()}</option>`).join("");
+
+            div.innerHTML = `
+                <button type="button" class="remover-btn" onclick="removerOcupante(${count})">Remover Ocupante</button>
+
+                <label>Ocupante:</label>
+                <input type="text" name="ocupante_nome_${count}" required>
+
+                <label>Nível Fixação:</label>
+                <input type="text" name="nivel_fixacao_${count}" required>
+
+                <label>Tipo Cabo:</label>
+                <select name="tipo_cabo_${count}" required>
+                    <option value="" disabled selected>Selecione o tipo</option>
+                    ${tipoOptions}
+                </select>
+
+                <label>Equipamento:</label>
+                <input type="text" name="equipamento_${count}" required>
+
+                <label>Placa Identificação:</label>
+                <input type="text" name="placa_identificacao_${count}" required>
+
+                <label>Irregularidades:</label>
+                <input type="text" name="irregularidades_${count}" required>
+
+                <label>Fotos do Ocupante:</label>
+                <input type="file" name="foto_ocupante_${count}[]" accept="image/*" multiple required>
+            `;
+
+            container.appendChild(div);
+            count++;
+            document.getElementById("total_ocupantes").value = count;
+        }
+
+        function removerOcupante(index) {
+            const div = document.getElementById(`ocupante_${index}`);
+            if (div) {
+                div.remove();
+            }
+        }
+
+        window.onload = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                    },
+                    (error) => {
+                        console.warn('Erro ao obter localização:', error.message);
+                    }
+                );
+            } else {
+                alert("Seu navegador não suporta geolocalização.");
+            }
+
+            const cidades = {{ cidades|tojson }};
+            tipos = {{ tipos|tojson }};
+
+            const cidadeSelect = document.getElementById("cidade");
+            const bairroSelect = document.getElementById("bairro");
+
+            Object.keys(cidades).forEach(cidade => {
+                const option = document.createElement("option");
+                option.value = cidade;
+                option.text = cidade.toUpperCase();
+                cidadeSelect.add(option);
+            });
+
+            cidadeSelect.addEventListener("change", function () {
+                const bairros = cidades[this.value] || [];
+                bairroSelect.innerHTML = "";
+
+                bairros.forEach(bairro => {
+                    const option = document.createElement("option");
+                    option.value = bairro;
+                    option.text = bairro.toUpperCase();
+                    bairroSelect.add(option);
+                });
+            });
+        };
+    </script>
+</head>
+<body>
+    <h1>Cadastro de Censo</h1>
+    <form action="/enviar" method="POST" enctype="multipart/form-data">
+        <label for="cidade">Cidade:</label>
+        <select name="cidade" id="cidade" required></select>
+
+        <label for="bairro">Bairro:</label>
+        <select name="bairro" id="bairro" required></select>
+
+        <label for="logradouro">Logradouro:</label>
+        <input type="text" name="logradouro" id="logradouro" required>
+
+        <label for="numero">Número:</label>
+        <input type="text" name="numero" id="numero" required>
+
+        <label for="barramento">Barramento:</label>
+        <input type="text" name="barramento" id="barramento">
+
+        <label for="foto_poste">Fotos do Poste:</label>
+        <input type="file" name="foto_poste[]" id="foto_poste" accept="image/*" multiple required>
+
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+        <input type="hidden" id="total_ocupantes" name="total_ocupantes" value="0">
+
+        <div id="ocupantes"></div>
+
+        <div class="botoes-container">
+            <button type="button" onclick="adicionarOcupante()">Adicionar Ocupante</button>
+            <button type="submit">Enviar</button>
+        </div>
+    </form>
+</body>
+</html>
