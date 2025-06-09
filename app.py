@@ -103,7 +103,7 @@ def enviar():
 
         index += 1
 
-    return f"<h2>{index} ocupante(s) registrado(s)!</h2><a href='/'>Voltar</a>"
+     return render_template('sucesso.html', mensagem=f'{index} ocupante(s) registrado(s)!')
 
 def salvar_foto(file, prefix):
     if file:
@@ -202,9 +202,9 @@ def exportar_excel():
         output.seek(0)
 
         return send_file(output,
-                         attachment_filename='registros.xlsx',
-                         as_attachment=True,
-                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                        download_name='registros.xlsx',
+                        as_attachment=True,
+                        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     except Exception as e:
         return f"Erro ao exportar Excel: {e}"
 
