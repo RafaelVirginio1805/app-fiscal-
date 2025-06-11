@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify
 import os
 import pandas as pd
 import mysql.connector
@@ -41,12 +41,42 @@ def carregar_tipo():
     df = pd.read_csv(CSV_PATH1)
     return df['TIPO'].dropna().str.strip().str.title().unique().tolist()
 
+CSV_EQUIPAMENTOS = 'data/equipamento.csv'
+CSV_IRREGULARIDADES = 'data/irregularidades.csv'
+
+def carregar_equipamentos():
+    if not os.path.exists('data/equipamento.csv'):
+        return []
+    try:
+        df = pd.read_csv('data/equipamento.csv', encoding='utf-8')
+    except UnicodeDecodeError:
+        df = pd.read_csv('data/equipamento.csv', encoding='ISO-8859-1')  # Alternativa para evitar erro
+    
+    return sorted(set(df['EQUIPAMENTO'].dropna().str.strip().str.title()))
+
+def carregar_irregularidades():
+    if not os.path.exists('data/irregularidades.csv'):
+        return []
+    try:
+        df = pd.read_csv('data/irregularidades.csv', encoding='utf-8')
+    except UnicodeDecodeError:
+        df = pd.read_csv('data/irregularidades.csv', encoding='ISO-8859-1')
+
+    return sorted(set(df['IRREGULARIDADES'].dropna().str.strip().str.title()))
+
 @app.route('/')
 def index():
     cidades_dict = carregar_cidades()
     tipos = carregar_tipo()
-    return render_template('form.html', cidades=cidades_dict, tipos=tipos)
+    equipamentos = sorted(set(carregar_equipamentos()))
+    irregularidades = sorted(set(carregar_irregularidades()))  
 
+    return render_template('form.html', 
+                           cidades=cidades_dict, 
+                           tipos=tipos, 
+                           equipamentos=equipamentos, 
+                           irregularidades=irregularidades)
+    
 @app.route('/enviar', methods=['POST'])
 def enviar():
     cidade = request.form['cidade']
@@ -85,10 +115,27 @@ def enviar():
             continue  # pula se foi removido ou está vazio
 
         nivel = request.form.get(f'nivel_fixacao_{index}')
-        tipo_cabo = request.form.get(f'tipo_cabo_{index}')
-        equipamento = request.form.get(f'equipamento_{index}')
+        tipo_cabo = request.form.getlist(f'tipo_cabo_{index}[]') 
+        equipamento = request.form.getlist(f'equipamento_{index}[]')
         placa = request.form.get(f'placa_identificacao_{index}')
-        irregularidades = request.form.get(f'irregularidades_{index}')
+        irregularidades = request.form.getlist(f'irregularidades_{index}[]')
+        tipo_cabo_outro = request.form.get(f'tipo_cabo_outro_{index}', '').strip()
+        
+        tipo_cabo_outro = request.form.get(f'tipo_cabo_outro_{index}', '').strip()
+        if tipo_cabo_outro:
+            tipo_cabo.append(tipo_cabo_outro)
+            
+        equipamento_outro = request.form.get(f'equipamento_outro_{index}', '').strip()
+        if equipamento_outro:
+           equipamento.append(equipamento_outro)   
+        
+        irregularidades_outro = request.form.get(f'irregularidades_outro_{index}', '').strip()
+        if irregularidades_outro:
+            irregularidades.append(irregularidades_outro)   
+            
+        tipo_cabo_str = ", ".join(tipo_cabo)
+        equipamento_str = ", ".join(equipamento)
+        irregularidades_str = ", ".join(irregularidades)
 
         foto_ocupante = request.files.getlist(f'foto_ocupante_{index}[]')
         caminhos_foto_ocupante = [salvar_foto(f, prefix=f'ocupante_{index}') for f in foto_ocupante if f]
@@ -96,8 +143,8 @@ def enviar():
 
         salvar_no_banco(
             cidade, logradouro, numero, bairro, barramento, ocupante,
-            nivel, tipo_cabo, equipamento, placa,
-            irregularidades, foto_ocupante_str, foto_poste_str,
+            nivel, tipo_cabo_str, equipamento_str, placa,
+            irregularidades_str, foto_ocupante_str, foto_poste_str,
             lat, lon, utm_x, utm_y, utm_zone_number, utm_zone_letter
         )
 
