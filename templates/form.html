@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <head>
+    <link rel="manifest" href="/static/manifest.json">
+    <script>
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/static/service-worker.js")
+            .then(() => console.log("Service Worker registrado!"))
+            .catch((err) => console.error("Erro ao registrar Service Worker:", err));
+    }
+    </script>
+  </head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro de Censo</title>
@@ -225,21 +235,33 @@
         <label>Nível Fixação:</label>
         <input type="text" name="nivel_fixacao_${count}" required>
         
-        <label>Tipo Cabo:</label>
-        <select name="tipo_cabo_${count}" required>
-          <option value="" disabled selected>Selecione o tipo</option>
-          ${tipoOptions}
-        </select>
-        
+        <label for="tipo_cabo_${count}">Tipo de Cabo:</label>
+<select name="tipo_cabo_${count}[]" id="tipo_cabo_${count}" multiple required onchange="verificarOutra2('${count}', 'tipo_cabo')">
+    {% for tipo in tipos %}
+    <option value="{{ tipo }}">{{ tipo }}</option>
+    {% endfor %}
+</select>
+<input type="text" name="tipo_cabo_outro_${count}" id="tipo_cabo_outro_${count}" placeholder="Digite o tipo de cabo" style="display: none;">
+
         <label>Equipamento:</label>
-        <input type="text" name="equipamento_${count}" required>
-        
+<select name="equipamento_${count}[]" id="equipamento_${count}" multiple onchange="verificarOutra('${count}', 'equipamento')" required>
+    {% for equipamento in equipamentos %}
+    <option value="{{ equipamento }}">{{ equipamento }}</option>
+    {% endfor %}
+</select>
+<input type="text" name="equipamento_outro_${count}" id="equipamento_outro_${count}" placeholder="Digite o equipamento" style="display: none;">
+
         <label>Placa Identificação:</label>
         <input type="text" name="placa_identificacao_${count}" required>
         
-        <label>Irregularidades:</label>
-        <input type="text" name="irregularidades_${count}" required>
-        
+       <label>Irregularidades:</label>
+<select name="irregularidades_${count}[]" id="irregularidades_${count}" multiple onchange="verificarOutra('${count}', 'irregularidades')" required>
+    {% for irregularidade in irregularidades %}
+    <option value="{{ irregularidade }}">{{ irregularidade }}</option>
+    {% endfor %}
+</select>
+<input type="text" name="irregularidades_outro_${count}" id="irregularidades_outro_${count}" placeholder="Digite a irregularidade" style="display: none;">
+       
         <label>Fotos do Ocupante:</label>
         <input type="file" name="foto_ocupante_${count}[]" accept="image/*" multiple required>
       `;
@@ -308,5 +330,43 @@
       });
     };
   </script>
+  <script>
+    function verificarOutra2(count, tipo) {
+    let select = document.querySelector(`#${tipo}_${count}`);
+    let inputOutro = document.querySelector(`#${tipo}_outro_${count}`);
+
+    if (select && inputOutro) {
+        let selecionados = Array.from(select.selectedOptions).map(option => option.value);
+
+        if (selecionados.includes("Out-Outros")) {
+            inputOutro.style.display = "block";
+            inputOutro.setAttribute("required", "true");
+        } else {
+            inputOutro.style.display = "none";
+            inputOutro.removeAttribute("required");
+            inputOutro.value = ""; 
+        }
+    }
+}
+  </script>
+  <script>
+    function verificarOutra(count, tipo) {
+    let select = document.querySelector(`#${tipo}_${count}`);
+    let inputOutro = document.querySelector(`#${tipo}_outro_${count}`);
+
+    if (select && inputOutro) {
+        let selecionados = Array.from(select.selectedOptions).map(option => option.value);
+        
+        if (selecionados.includes("Outra")) {
+            inputOutro.style.display = "block";
+            inputOutro.setAttribute("required", "true");
+        } else {
+            inputOutro.style.display = "none";
+            inputOutro.removeAttribute("required");
+            inputOutro.value = ""; 
+        }
+    }
+}
+</script>
 </body>
 </html>
