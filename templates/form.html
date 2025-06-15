@@ -331,14 +331,14 @@
     };
   </script>
   <script>
-    function verificarOutra2(count, tipo) {
+function verificarOutra2(count, tipo) {
     let select = document.querySelector(`#${tipo}_${count}`);
     let inputOutro = document.querySelector(`#${tipo}_outro_${count}`);
 
     if (select && inputOutro) {
-        let selecionados = Array.from(select.selectedOptions).map(option => option.value);
+        let selecionados = Array.from(select.selectedOptions).map(option => option.value.toUpperCase());
 
-        if (selecionados.includes("Out-Outros")) {
+        if (selecionados.includes("OUT- OUTROS")) {
             inputOutro.style.display = "block";
             inputOutro.setAttribute("required", "true");
         } else {
@@ -348,7 +348,7 @@
         }
     }
 }
-  </script>
+</script>
   <script>
     function verificarOutra(count, tipo) {
     let select = document.querySelector(`#${tipo}_${count}`);
