@@ -256,5 +256,5 @@ def exportar_excel():
         return f"Erro ao exportar Excel: {e}"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True, ssl_context=('certificado.pem', 'chave.pem'))
+    app.run(host='0.0.0.0', port=5000, debug=True,)
 
