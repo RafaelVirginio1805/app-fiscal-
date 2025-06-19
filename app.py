@@ -103,7 +103,7 @@ def enviar():
     caminhos_foto_poste = [salvar_foto(f, prefix='poste') for f in foto_poste if f]
     foto_poste_str = ';'.join(caminhos_foto_poste)
 
-    index = 0
+index = 0
 while True:
     key = f'ocupante_nome_{index}'
     if key not in request.form:
