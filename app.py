@@ -104,53 +104,53 @@ def enviar():
     foto_poste_str = ';'.join(caminhos_foto_poste)
 
     index = 0
-    while True:
-        key = f'ocupante_nome_{index}'
-        if key not in request.form:
-            break
+while True:
+    key = f'ocupante_nome_{index}'
+    if key not in request.form:
+        break
 
-        ocupante = request.form.get(f'ocupante_nome_{index}')
-        if not ocupante:
-            index += 1
-            continue  # pula se foi removido ou está vazio
-
-        nivel = request.form.get(f'nivel_fixacao_{index}')
-        tipo_cabo = request.form.getlist(f'tipo_cabo_{index}[]') 
-        equipamento = request.form.getlist(f'equipamento_{index}[]')
-        placa = request.form.get(f'placa_identificacao_{index}')
-        irregularidades = request.form.getlist(f'irregularidades_{index}[]')
-        tipo_cabo_outro = request.form.get(f'tipo_cabo_outro_{index}', '').strip()
-        
-        tipo_cabo_outro = request.form.get(f'tipo_cabo_outro_{index}', '').strip()
-        if tipo_cabo_outro:
-            tipo_cabo.append(tipo_cabo_outro)
-            
-        equipamento_outro = request.form.get(f'equipamento_outro_{index}', '').strip()
-        if equipamento_outro:
-           equipamento.append(equipamento_outro)   
-        
-        irregularidades_outro = request.form.get(f'irregularidades_outro_{index}', '').strip()
-        if irregularidades_outro:
-            irregularidades.append(irregularidades_outro)   
-            
-        tipo_cabo_str = ", ".join(tipo_cabo)
-        equipamento_str = ", ".join(equipamento)
-        irregularidades_str = ", ".join(irregularidades)
-
-        foto_ocupante = request.files.getlist(f'foto_ocupante_{index}[]')
-        caminhos_foto_ocupante = [salvar_foto(f, prefix=f'ocupante_{index}') for f in foto_ocupante if f]
-        foto_ocupante_str = ';'.join(caminhos_foto_ocupante)
-
-        salvar_no_banco(
-            cidade, logradouro, numero, bairro, barramento, ocupante,
-            nivel, tipo_cabo_str, equipamento_str, placa,
-            irregularidades_str, foto_ocupante_str, foto_poste_str,
-            lat, lon, utm_x, utm_y, utm_zone_number, utm_zone_letter
-        )
-
+    ocupante = request.form.get(f'ocupante_nome_{index}')
+    if not ocupante:
         index += 1
-        
-        return render_template('sucesso.html', mensagem=f'{index} ocupante(s) registrado(s)!')
+        continue  # pula se foi removido ou está vazio
+
+    nivel = request.form.get(f'nivel_fixacao_{index}')
+    tipo_cabo = request.form.getlist(f'tipo_cabo_{index}[]') 
+    equipamento = request.form.getlist(f'equipamento_{index}[]')
+    placa = request.form.get(f'placa_identificacao_{index}')
+    irregularidades = request.form.getlist(f'irregularidades_{index}[]')
+
+    tipo_cabo_outro = request.form.get(f'tipo_cabo_outro_{index}', '').strip()
+    if tipo_cabo_outro:
+        tipo_cabo.append(tipo_cabo_outro)
+
+    equipamento_outro = request.form.get(f'equipamento_outro_{index}', '').strip()
+    if equipamento_outro:
+        equipamento.append(equipamento_outro)   
+
+    irregularidades_outro = request.form.get(f'irregularidades_outro_{index}', '').strip()
+    if irregularidades_outro:
+        irregularidades.append(irregularidades_outro)   
+
+    tipo_cabo_str = ", ".join(tipo_cabo)
+    equipamento_str = ", ".join(equipamento)
+    irregularidades_str = ", ".join(irregularidades)
+
+    foto_ocupante = request.files.getlist(f'foto_ocupante_{index}[]')
+    caminhos_foto_ocupante = [salvar_foto(f, prefix=f'ocupante_{index}') for f in foto_ocupante if f]
+    foto_ocupante_str = ';'.join(caminhos_foto_ocupante)
+
+    salvar_no_banco(
+        cidade, logradouro, numero, bairro, barramento, ocupante,
+        nivel, tipo_cabo_str, equipamento_str, placa,
+        irregularidades_str, foto_ocupante_str, foto_poste_str,
+        lat, lon, utm_x, utm_y, utm_zone_number, utm_zone_letter
+    )
+
+    index += 1
+
+# Agora sim, só renderiza depois de processar tudo
+return render_template('sucesso.html', mensagem=f'{index} ocupante(s) registrado(s)!')
 
 def salvar_foto(file, prefix):
     if file:
