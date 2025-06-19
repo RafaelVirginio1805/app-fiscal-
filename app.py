@@ -150,7 +150,7 @@ def enviar():
 
         index += 1
 
-    return render_template('sucesso.html', mensagem=f'{index} ocupante(s) registrado(s)!')
+        return render_template('sucesso.html', mensagem=f'{index} ocupante(s) registrado(s)!')
 
 
 def salvar_foto(file, prefix):
